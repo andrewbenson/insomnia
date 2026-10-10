@@ -114,8 +114,8 @@ struct Config: Codable, Equatable, Sendable {
     /// Default agent list (spec section 5). Bundle ids confirmed against
     /// installed apps where possible; see README for how to edit.
     static let defaultAgentList: [String] = [
-        "com.t3tools.t3code",             // T3 Code (Nightly)
-        "com.t3tools.t3code.reasoning",   // T3 Code (Reasoning)
+        "com.t3tools.t3code",             // T3 Code
+        "com.t3tools.t3code.reasoning",   // Legacy T3 variant; unverified in current distribution
         "com.conductor.app",              // Conductor
         "com.apple.Terminal",             // Terminal
         "com.googlecode.iterm2",          // iTerm2

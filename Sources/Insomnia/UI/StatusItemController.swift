@@ -665,15 +665,15 @@ final class StatusItemController: NSObject {
         StatusMenu.items(
             sessionActive: manager.isActive,
             sleepHeld: manager.state.sleepDisabledByUs,
-            machine: StatusLines.machine(
+            machine: StatusLines.power(
                 lidClosed: status.lidClosed,
                 watts: status.instantWatts(),
-                wifiSSID: WiFiStatusName.display(
-                    ssid: status.wifiSSID,
-                    locationAuthorized: (status as? LiveStatusSource)?.locationPermission.isAuthorized ?? true
-                ),
                 batteryPercent: status.batteryPercent,
                 isCharging: status.isCharging
+            ),
+            network: WiFiStatusName.compact(
+                ssid: status.wifiSSID,
+                locationAuthorized: (status as? LiveStatusSource)?.locationPermission.isAuthorized ?? true
             ),
             actions: StatusLines.actions(
                 frozenCount: status.frozenCount,

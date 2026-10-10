@@ -60,6 +60,19 @@ final class PlaceholderStatus: StatusSource {
 /// Pure formatting for the menu's status block, kept out of the views so
 /// it can be tested.
 enum StatusLines {
+    /// Short power row for the menu; Wi-Fi lives on its own row.
+    static func power(lidClosed: Bool, watts: Double?, batteryPercent: Int?, isCharging: Bool) -> String {
+        var parts = [lidClosed ? "Lid closed" : "Lid open"]
+        if let percent = batteryPercent {
+            parts.append("\(percent)%")
+            parts.append(isCharging ? "On power" : "On battery")
+        }
+        if let watts, watts.isFinite, abs(watts) >= 0.1 {
+            parts.append(String(format: "%.1f W", abs(watts)))
+        }
+        return parts.joined(separator: " · ")
+    }
+
     /// "Lid: closed · 4.1 W · Wi-Fi: iPhone". Unknown parts are omitted.
     static func machine(lidClosed: Bool, watts: Double?, wifiSSID: String?, batteryPercent: Int?, isCharging: Bool) -> String {
         var parts: [String] = ["Lid: \(lidClosed ? "closed" : "open")"]
@@ -131,6 +144,11 @@ enum SleepHeldLine {
 /// macOS hides Wi-Fi network names until Location is allowed; say so rather
 /// than reporting no network at all.
 enum WiFiStatusName {
+    static func compact(ssid: String?, locationAuthorized: Bool) -> String {
+        if let ssid, !ssid.isEmpty { return "Wi-Fi: \(ssid)" }
+        return locationAuthorized ? "Wi-Fi: unavailable" : "Wi-Fi: name hidden"
+    }
+
     static func display(ssid: String?, locationAuthorized: Bool) -> String? {
         if let ssid, !ssid.isEmpty { return ssid }
         return locationAuthorized ? nil : "on (name hidden until Location is allowed)"

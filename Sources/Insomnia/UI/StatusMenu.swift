@@ -50,6 +50,7 @@ enum StatusMenu {
         sessionActive: Bool,
         sleepHeld: Bool,
         machine: String?,
+        network: String? = nil,
         actions: String?,
         throttledBrowsers: [ThrottledBrowser],
         relaunchProblems: [String] = [],
@@ -66,6 +67,9 @@ enum StatusMenu {
         }
         if let machine = present(machine) {
             out.append(Item(title: machine, kind: .info))
+        }
+        if let network = present(network) {
+            out.append(Item(title: network, kind: .info))
         }
         if let actions = present(actions) {
             out.append(Item(title: actions, kind: .info))
@@ -148,6 +152,7 @@ enum StatusMenu {
                     attributes[.foregroundColor] = NSColor.systemOrange
                 }
                 entry.attributedTitle = NSAttributedString(string: item.title, attributes: attributes)
+                entry.view = statusView(title: item.title, warning: item.kind == .warning, font: lineFont)
                 menu.addItem(entry)
             case .settings:
                 menu.addItem(action(title: item.title, selector: settings, key: ",", target: target))
@@ -163,7 +168,29 @@ enum StatusMenu {
                 menu.addItem(entry)
             }
         }
+        // Extra breathing room under the final native action. This disabled,
+        // decorative item does not participate in keyboard navigation.
+        let inset = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+        inset.isEnabled = false
+        inset.view = NSView(frame: NSRect(x: 0, y: 0, width: 1, height: 4))
+        inset.view?.setAccessibilityElement(false)
+        menu.addItem(inset)
         return menu
+    }
+
+    @MainActor
+    private static func statusView(title: String, warning: Bool, font: NSFont) -> NSView {
+        let text = NSAttributedString(string: title, attributes: [.font: font])
+        let width = min(max(180, ceil(text.size().width)), 280)
+        let label = NSTextField(wrappingLabelWithString: title)
+        label.font = font
+        label.textColor = warning ? .systemOrange : .secondaryLabelColor
+        label.maximumNumberOfLines = 0
+        let height = ceil(label.cell?.cellSize(forBounds: NSRect(x: 0, y: 0, width: width, height: .greatestFiniteMagnitude)).height ?? font.pointSize * 2)
+        let view = NSView(frame: NSRect(x: 0, y: 0, width: width + 28, height: height + 10))
+        label.frame = NSRect(x: 14, y: 5, width: width, height: height)
+        view.addSubview(label)
+        return view
     }
 
     @MainActor

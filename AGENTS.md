@@ -10,3 +10,10 @@ Check the total status-item width across states when changing the UI, and keep
 typing and animations from introducing unnecessary width changes. Preserve
 readable values, accessible labels, and usable click targets while tightening
 the layout.
+
+## GUI tests
+
+UIStatusTests and UIStartupTests create real menu bar items and keyboard-focus
+panels. Run them in an isolated macOS session, not on an active user desktop.
+Use the noninteractive settings, application-bundle and menu-model tests for
+routine local checks.

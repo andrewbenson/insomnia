@@ -93,6 +93,14 @@ enum FreezePlanner {
     /// October 1, 2026. Apple's own apps are covered by the `com.apple.`
     /// rule in `isDenied` and do not belong here.
     static let builtInProtected: Set<String> = Set([
+        // Additional installations verified in the fork's bundle audit,
+        // October 10, 2026 (docs/bundle-audit.md).
+        "ai.opencode.desktop",              // OpenCode
+        "company.thebrowser.dia",           // Dia
+        "com.termius-dmg.mac",               // Termius
+        "com.wireguard.macos",               // WireGuard
+        "com.utmapp.UTM",                    // UTM
+        "io.tailscale.ipn.macos",            // Tailscale (Mac App Store)
         // Editors and agent hosts
         "com.microsoft.VSCode",             // Visual Studio Code (installed)
         "com.microsoft.VSCodeInsiders",     // Visual Studio Code Insiders (cask visual-studio-code@insiders)
