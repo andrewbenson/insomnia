@@ -17,5 +17,5 @@ Before publishing, check the installed app on an actual desktop: start a short
 session, edit each duration field without the popover collapsing, add time, end
 the session and confirm the countdown disappears, then open Settings and quit.
 Automated engine and offscreen layout tests cannot establish pointer behavior
-in the system menu bar. This rebuild is held on `fix/native-menu-popover` until
-that check passes; the fork's main branch is unchanged.
+in the system menu bar. The installed native popover was accepted by the user before merging into the
+fork's main branch.

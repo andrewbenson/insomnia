@@ -196,13 +196,14 @@ installer prints its pid.
 
 ## Using it
 
-1. **Start:** click the eye in the menu bar, enter Days / Hours / Minutes, and
-   press Enter.
-2. **Extend:** click the eye or countdown during a session and enter more time.
-3. **End early:** click the × button beside the countdown.
-4. **Inspect or configure:** right-click for status, recovery warnings,
-   **Settings**, and **Quit Insomnia**. Quitting requests session cleanup and
-   can be refused while required recovery remains.
+1. **Start:** click the eye in the menu bar to open the native popover, enter
+   Days / Hours / Minutes, and click **Start**.
+2. **Extend:** open the popover during a session, enter more time, and click
+   **Add Time**. Editing the fields alone does not change the session.
+3. **End early:** click **End Session** in the popover.
+4. **Inspect or configure:** the popover shows status, recovery warnings,
+   **Settings**, and **Quit**. Quitting requests session cleanup and can be
+   refused while required recovery remains.
 
 You do not need to close the lid to use a timed session. Opening the lid does
 not end it, and a sleeping display is not the same as a sleeping Mac.
@@ -478,7 +479,7 @@ it, and Insomnia reads it with Keychain prompts switched off, so a join during
 an outage never raises a dialog. The installer signs each build ad hoc, which
 gives every install a new identity: after a reinstall the saved password is
 unreadable by the new build. Insomnia then skips the join, shows "Hotspot
-password unreadable by this build" in the right-click menu and in Settings,
+password unreadable by this build" in the popover and in Settings,
 and sends one notification per outage. The warning belongs to the SSID it was
 read for. Change the SSID and it goes, and Settings checks the new SSID's
 saved password instead. Enter the password again in Settings and save; the
@@ -530,7 +531,7 @@ pending automation but cannot retract keystrokes already sent.
 Chromium browsers can throttle windows macOS considers occluded, including
 when the lid is closed. Insomnia detects supported running browsers missing
 `--disable-backgrounding-occluded-windows` or `--disable-renderer-backgrounding`
-and offers **Relaunch [browser] unthrottled** in the right-click menu. The item
+and offers **Relaunch [browser] unthrottled** in the popover. The item
 asks first, because the browser is quit and its windows and tabs come back only
 if it is set to reopen them on startup. If the browser has quit by the time you
 confirm, nothing is quit or launched and a notification says so. Insomnia reads the browser's profile
@@ -542,7 +543,7 @@ so: a second copy beside the first would be worse than a throttled one. The
 quit request stands, so a browser that closes later has to be opened again by
 hand. After `open` returns, Insomnia waits up to 5 s for the browser to show up
 as running and notifies if it does not. Each of these reasons also stays in the
-right-click menu as a warning line, one per browser, until that browser's next
+popover as a warning line, one per browser, until that browser's next
 relaunch or the next session, so it is there even with notifications off. A
 relaunch that ends after its session ended, or after a newer relaunch of the
 same browser started, reports nothing. This is not a guarantee that every web
@@ -627,7 +628,7 @@ rather than assuming missing integration coverage passed. Tests use injected
 dependencies and temporary fixtures—not live installation or power changes
 on a contributor's machine.
 
-The app icon is the menu bar's open eye on a charcoal tile: [AppIconArtwork](Sources/Insomnia/UI/AppIconArtwork.swift) draws it from the same [vector geometry](Sources/Insomnia/UI/EyeMarkGeometry.swift) as the menu bar's closed eye, which opens while a session runs.
+The app icon uses an open eye on a charcoal tile: [AppIconArtwork](Sources/Insomnia/UI/AppIconArtwork.swift) draws it from [vector geometry](Sources/Insomnia/UI/EyeMarkGeometry.swift). The native menu bar label uses the system eye symbol and adds a countdown during a session.
 After changing the artwork, run `./scripts/generate-app-icon.sh` to regenerate
 the packaged PNG and ICNS assets and the README's SVG. The script draws them
 offline with Xcode's swiftc and iconutil.
