@@ -652,7 +652,8 @@ final class SessionManager {
             audio: audio,
             processControl: processControl,
             display: display,
-            keyboard: keyboard
+            keyboard: keyboard,
+            displayAwake: DisplayAwakeGuard()
         )
         m.services = services
         services.logStartupSnapshot()

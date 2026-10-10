@@ -11,6 +11,9 @@ struct Config: Codable, Equatable, Sendable {
     /// Hard ceiling on a session, including extensions. 30 days.
     var maxDuration: TimeInterval = 30 * 24 * 3600
 
+    /// Opt-in display idle prevention while a session runs with the lid open.
+    var keepDisplayAwake: Bool = false
+
     // Lid-close actions
     /// Bundle ids to SIGSTOP while the lid is closed.
     var freezeList: [String] = Config.defaultFreezeList
@@ -144,6 +147,7 @@ struct Config: Codable, Equatable, Sendable {
         presets = try c.decodeIfPresent([TimeInterval].self, forKey: .presets) ?? d.presets
         defaultPreset = try c.decodeIfPresent(TimeInterval.self, forKey: .defaultPreset) ?? d.defaultPreset
         maxDuration = try c.decodeIfPresent(TimeInterval.self, forKey: .maxDuration) ?? d.maxDuration
+        keepDisplayAwake = try c.decodeIfPresent(Bool.self, forKey: .keepDisplayAwake) ?? d.keepDisplayAwake
         freezeList = try c.decodeIfPresent([String].self, forKey: .freezeList) ?? d.freezeList
         freezeAllApps = try c.decodeIfPresent(Bool.self, forKey: .freezeAllApps) ?? d.freezeAllApps
         dockerRule = try c.decodeIfPresent(Bool.self, forKey: .dockerRule) ?? d.dockerRule

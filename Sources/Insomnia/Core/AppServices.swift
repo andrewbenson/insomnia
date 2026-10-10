@@ -51,6 +51,7 @@ final class AppServices {
     let notifier: any Notifying
     let locationPermission: LocationPermission
 
+    private let displayAwake: any DisplayAwakeGuarding
     private let paths: Paths
     private let audio: any AudioControlling
     private let display: any DisplayDimming
@@ -110,8 +111,10 @@ final class AppServices {
         browser: BrowserThrottle? = nil,
         idleSeconds: @escaping @Sendable () -> Double = { UserInput.secondsSinceLastInput() },
         lidSimulation: (any LidSimulating)? = LidSimulationBuild.makeWatcher(),
-        lidSimulationEnabled: Bool = LidSimulationBuild.isCompiledIn
+        lidSimulationEnabled: Bool = LidSimulationBuild.isCompiledIn,
+        displayAwake: any DisplayAwakeGuarding = NoopDisplayAwakeGuard()
     ) {
+        self.displayAwake = displayAwake
         self.paths = paths
         self.notifier = notifier
         self.audio = audio
@@ -158,6 +161,7 @@ final class AppServices {
         lid.onChange = { [weak self] closed in self?.lidChanged(closed) }
         lid.start()
         status.lidClosed = lid.isClosed
+        refreshDisplayAwake()
         sampleBrightnessIfLidOpen()
         let timer = DispatchSource.makeTimerSource(queue: .main)
         timer.schedule(deadline: .now() + Self.sampleInterval, repeating: Self.sampleInterval, leeway: Self.sampleLeeway)
@@ -195,6 +199,7 @@ final class AppServices {
     func stop() {
         guard running else { return }
         running = false
+        refreshDisplayAwake()
         lid.stop()
         lid.onChange = nil
         lastLidEvent = nil
@@ -218,6 +223,13 @@ final class AppServices {
         lidActions = nil
         floors = nil
         syncState()
+    }
+
+    /// Settings changes apply immediately, including during an active session.
+    func refreshDisplayAwake() {
+        displayAwake.update(active: running && manager?.isActive == true,
+                            enabled: manager?.config.keepDisplayAwake ?? false,
+                            lidClosed: status.lidClosed)
     }
 
     /// One-shot launch diagnostics. This does not start any observer or retry
@@ -249,6 +261,7 @@ final class AppServices {
         power.refreshBattery()
         syncPower()
         if let now = LidObserver.readClamshellState() { status.lidClosed = now }
+        refreshDisplayAwake()
         syncState()
     }
 
@@ -382,6 +395,7 @@ final class AppServices {
     private func lidChanged(_ closed: Bool) {
         lastLidEvent = closed
         status.lidClosed = closed
+        refreshDisplayAwake()
         guard let actions = lidActions else { return }
         // Numbered now, not when its turn comes: an open makes a close that
         // is still queued or waiting on a Docker probe stale at once.

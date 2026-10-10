@@ -159,6 +159,12 @@ struct SettingsView: View {
 
     private var sessionSection: some View {
         Section("Session") {
+            Toggle("Keep display awake", isOn: bind(\.keepDisplayAwake))
+                .onChange(of: manager.config.keepDisplayAwake) { _, _ in
+                    manager.services?.refreshDisplayAwake()
+                }
+            Text("Prevent display idle sleep during a session while the lid is open.")
+                .font(.caption).foregroundStyle(.secondary)
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 82))], spacing: 8) {
                 ForEach(manager.config.presets, id: \.self) { p in
                     HStack(spacing: 6) {

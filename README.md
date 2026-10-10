@@ -205,6 +205,11 @@ installer prints its pid.
    **Settings**, and **Quit**. Quitting requests session cleanup and can be
    refused while required recovery remains.
 
+In **Settings → General → Session**, enable **Keep display awake** to prevent
+idle display sleep while a session is active and the lid is open. It defaults
+off. Changes apply immediately; closing the lid or ending the session releases
+the display hold. It does not change your macOS display or screensaver settings.
+
 You do not need to close the lid to use a timed session. Opening the lid does
 not end it, and a sleeping display is not the same as a sleeping Mac.
 
