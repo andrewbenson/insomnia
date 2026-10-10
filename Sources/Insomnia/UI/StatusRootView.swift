@@ -64,7 +64,7 @@ struct StatusRootView: View {
     }
 
     var body: some View {
-        HStack(spacing: Self.slotSpacing) {
+        HStack(spacing: showsCountdown && !model.slotsPresent ? 4 : Self.slotSpacing) {
             icon
             // What comes and goes with the layout carries its own animation
             // on its transition (`Motion.countdownTransition` and friends):
@@ -85,11 +85,11 @@ struct StatusRootView: View {
                 }
             }
         }
-        .padding(.leading, 6)
+        .padding(.leading, showsCountdown && !model.slotsPresent ? 2 : 6)
         // Never animated: `slotsPresent` can land in the same transaction as
         // a `withAnimation` (a refused start reopens the pills in one turn),
         // and an interpolated inset would report a width per frame.
-        .animation(nil) { $0.padding(.trailing, model.slotsPresent ? 8 : 6) }
+        .animation(nil) { $0.padding(.trailing, model.slotsPresent ? 8 : (showsCountdown ? 2 : 6)) }
         .frame(height: NSStatusBar.system.thickness)
         .fixedSize()
         .contentShape(Rectangle())
