@@ -12,12 +12,10 @@ enum CompactCountdown {
         return hours > 0 ? "\(hours)h\(totalMinutes % 60)m" : "\(totalMinutes)m"
     }
 
-    /// Fixed for the session span, rather than recomputed from remaining time.
-    /// An explicit extension can increase this capacity; ordinary ticks cannot.
-    static func widthTemplate(duration: TimeInterval) -> String {
-        let hours = Int(max(duration, 0) / 3600)
-        if hours > 0 { return String(repeating: "8", count: String(hours).count) + "h88m" }
-        return "88m"
+    /// Hours/minutes fit their content. Reserve two digits only during the
+    /// final minute so 10s -> 9s does not resize the menu bar every tick.
+    static func widthTemplate(text: String) -> String {
+        text.hasSuffix("s") ? "88s" : text
     }
 }
 

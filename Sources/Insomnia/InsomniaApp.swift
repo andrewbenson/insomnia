@@ -11,9 +11,8 @@ struct InsomniaApp: App {
         } label: {
             CompactMenuBarLabel(
                 text: delegate.manager.isActive ? delegate.manager.compactCountdownText : nil,
-                widthTemplate: delegate.manager.session.map {
-                    CompactCountdown.widthTemplate(duration: $0.endsAt.timeIntervalSince($0.startedAt))
-                }
+                widthTemplate: delegate.manager.isActive
+                    ? CompactCountdown.widthTemplate(text: delegate.manager.compactCountdownText) : nil
             )
         }
         .menuBarExtraStyle(.window)

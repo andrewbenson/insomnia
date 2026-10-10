@@ -16,20 +16,22 @@ final class CompactCountdownTests: XCTestCase {
     }
 
     @MainActor
-    func testLabelWidthRemainsStableThroughUnitAndDigitChanges() {
-        for duration in [3600.0 * 6, 3600.0 * 12, 86400.0 * 30, 1800.0] {
-            let template = CompactCountdown.widthTemplate(duration: duration)
-            let widths = [duration, duration - 1, 3600, 3599, 600, 599, 60, 59, 10, 9, 0].map { remaining in
-                let label = CompactMenuBarLabel(
-                    text: CompactCountdown.text(remaining: min(remaining, duration)),
-                    widthTemplate: template
-                )
-                return label.renderedImage.size.width
-            }
-            XCTAssertGreaterThan(widths[0], 30)
-            for width in widths { XCTAssertEqual(width, widths[0], accuracy: 0.1) }
+    func testSecondsKeepTheirWidthButDroppingHoursShrinks() {
+        func width(_ text: String) -> CGFloat {
+            CompactMenuBarLabel(text: text, widthTemplate: CompactCountdown.widthTemplate(text: text))
+                .renderedImage.size.width
         }
+        let secondsWidth = width("59s")
+        XCTAssertGreaterThan(secondsWidth, 30)
+        for seconds in 0...60 {
+            XCTAssertEqual(width("\(seconds)s"), secondsWidth, accuracy: 0.1)
+        }
+        XCTAssertEqual(width("5h59m"), width("5h58m"), accuracy: 0.1)
+        XCTAssertEqual(width("59m"), width("58m"), accuracy: 0.1)
+        XCTAssertLessThan(width("59m"), width("1h0m"))
+        XCTAssertLessThan(width("9m"), width("10m"))
     }
+
     @MainActor
     func testCompactTextUsesTheEngineClockAndClearsAfterEnd() async throws {
         let h = Harness()

@@ -3,10 +3,11 @@
 The app now uses SwiftUI's `MenuBarExtra` with `.window` style. The menu bar
 label contains only the system eye symbol and a compact countdown (`5h59m`,
 `59m`, then seconds below one minute).
-The timer reserves enough monospaced text width for the session span so ordinary
-ticks and unit changes do not alter the label's layout. SwiftUI renders the
-label to a native template image with a fixed intrinsic size; width does not
-depend on whether MenuBarExtra preserves Text modifiers. Clicking it
+Hours and minutes fit their content, shrinking when the hour unit disappears.
+Only the final-minute seconds countdown reserves two digits, so ordinary second
+ticks do not change its width. SwiftUI renders the label to a native template
+image; its intrinsic size does not depend on MenuBarExtra preserving Text
+modifiers. Clicking it
 opens a system-owned popover with native duration text fields and explicit
 Start, Add Time, and End Session buttons. Editing a duration does not change the
 running session. End Session directly awaits the existing recovery operation.
