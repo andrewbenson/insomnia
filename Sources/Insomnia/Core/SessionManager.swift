@@ -100,6 +100,8 @@ final class SessionManager {
     private(set) var remainingText: String = ""
     /// Live `H:MM:SS` countdown for the status item, updated at 1 Hz.
     private(set) var countdownText: String = ""
+    /// Compact menu bar text; changes per minute until the final minute.
+    private(set) var compactCountdownText: String = ""
 
     /// Why the display or the keyboard backlight is left alone on lid close
     /// on this Mac (a macOS the private calls were not measured on, a
@@ -1368,6 +1370,7 @@ final class SessionManager {
         scheduledDeadline = nil
         remainingText = ""
         countdownText = ""
+        compactCountdownText = ""
         // Why session.json is still in place when a relaunch could act on
         // it; the end is then retried and quit refused.
         var retainedBecause: String?
@@ -2883,9 +2886,12 @@ final class SessionManager {
         guard let s = session else {
             remainingText = ""
             countdownText = ""
+            compactCountdownText = ""
             return
         }
         let remaining = s.remaining(at: clock())
+        let compact = CompactCountdown.text(remaining: remaining)
+        if compactCountdownText != compact { compactCountdownText = compact }
         let minute = SessionMath.formatRemaining(remaining)
         if remainingText != minute { remainingText = minute }
         let second = SessionMath.formatCountdown(remaining: remaining, shape: s.countdownShape)

@@ -9,10 +9,12 @@ struct InsomniaApp: App {
         MenuBarExtra {
             SessionPopover(manager: delegate.manager, status: delegate.status)
         } label: {
-            Image(systemName: "eye")
-            if delegate.manager.isActive {
-                Text(delegate.manager.countdownText).monospacedDigit()
-            }
+            CompactMenuBarLabel(
+                text: delegate.manager.isActive ? delegate.manager.compactCountdownText : nil,
+                widthTemplate: delegate.manager.session.map {
+                    CompactCountdown.widthTemplate(duration: $0.endsAt.timeIntervalSince($0.startedAt))
+                }
+            )
         }
         .menuBarExtraStyle(.window)
         Settings {
