@@ -132,7 +132,7 @@ final class StatusItemController: NSObject {
         // while the host was measured above, before `hostingView` was set,
         // in which case `retargetWidth` treats the fitting width as a
         // repeat and never grows the frame: size the host here.
-        host.frame.size.width = max(widthTarget, host.fittingSize.width.rounded(.up), 20)
+        host.frame.size.width = max(widthTarget, host.fittingSize.width.rounded(.up), 17)
         widthChanged(host.fittingSize.width)
         logFrames("installed")
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in self?.logFrames("after 1s") }
@@ -167,7 +167,7 @@ final class StatusItemController: NSObject {
     /// widest content it has held, so content on its way out always has
     /// room to finish its transition when the length narrows over it.
     private func retargetWidth(_ width: CGFloat) {
-        let w = max(width.rounded(.up), 20)
+        let w = max(width.rounded(.up), 17)
         guard w != widthTarget else { return }
         widthTarget = w
         widthTargetChangeCount += 1

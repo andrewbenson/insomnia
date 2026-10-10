@@ -12,15 +12,15 @@ final class CompactStatusLayoutTests: XCTestCase {
     }
 
     @MainActor
-    func testIdleReservesOnlyTheTwentyPointIconTarget() {
+    func testIdleReservesOnlyTheSeventeenPointIcon() {
         _ = NSApplication.shared
         let harness = Harness()
         defer { harness.home.destroy() }
-        XCTAssertEqual(width(model: MenuBarModel(), manager: harness.makeManager()), 20, accuracy: 0.01)
+        XCTAssertEqual(width(model: MenuBarModel(), manager: harness.makeManager()), 17, accuracy: 0.01)
     }
 
     @MainActor
-    func testRunningTwentyMinuteTimerFitsWithinEightyFourPoints() async {
+    func testRunningTwentyMinuteTimerFitsWithinEightyOnePoints() async {
         _ = NSApplication.shared
         let harness = Harness()
         defer { harness.home.destroy() }
@@ -29,7 +29,7 @@ final class CompactStatusLayoutTests: XCTestCase {
         let model = MenuBarModel()
         model.phase = .running
         XCTAssertTrue(manager.isActive)
-        XCTAssertLessThanOrEqual(width(model: model, manager: manager), 84)
+        XCTAssertLessThanOrEqual(width(model: model, manager: manager), 81)
         await manager.end(reason: .user)
     }
 

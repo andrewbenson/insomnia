@@ -104,7 +104,7 @@ struct StatusRootView: View {
     /// visibly does something even when Low Power Mode is not showing.
     private var icon: some View {
         EyeMarkView(isRunning: eyeOpen, reduceMotion: reduceMotion)
-            .frame(width: 20, height: 20)
+            .frame(width: 17, height: 20)
             .contentShape(Rectangle())
             .phaseAnimator([CGFloat(1), reduceMotion ? 1 : 0.86, 1], trigger: model.iconBounce) { content, scale in
                 content.scaleEffect(scale)
