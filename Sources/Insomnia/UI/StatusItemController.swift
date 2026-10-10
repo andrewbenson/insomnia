@@ -767,12 +767,17 @@ final class StatusItemController: NSObject {
         }
         localMouseMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]) { [weak self] event in
             MainActor.assumeIsolated {
-                self?.handleLocalMouse(window: event.window)
+                self?.handleMouse(window: event.window, location: NSEvent.mouseLocation)
             }
             return event
         }
-        globalMouseMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]) { [weak self] event in
-            Task { @MainActor in self?.collapse() }
+        let generation = stageGeneration
+        globalMouseMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]) { [weak self] _ in
+            let location = NSEvent.mouseLocation
+            Task { @MainActor in
+                guard let self, self.stageGeneration == generation else { return }
+                self.handleMouse(window: nil, location: location)
+            }
         }
     }
 
@@ -787,13 +792,16 @@ final class StatusItemController: NSObject {
         keyCatcher = nil
     }
 
-    /// A click anywhere in this app that is not the status item collapses
-    /// the pills.
-    private func handleLocalMouse(window: NSWindow?) {
+    /// Screen bounds also identify status-item clicks when the event has no
+    /// matching app window (including delivery through the global monitor).
+    private func handleMouse(window: NSWindow?, location: NSPoint) {
         guard model.phase.isEntering else { return }
         // The catcher panel ignores the mouse so it should never be reported
         // here, but it is ours: it must not dismiss the pills either.
-        if let w = window, w === button?.window || w === keyCatcher { return }
+        let isOwnWindow = window.map { $0 === button?.window || $0 === keyCatcher } ?? false
+        let frame = button?.window?.frame
+        guard StatusMouseDismissal.shouldDismiss(isOwnWindow: isOwnWindow, location: location, statusFrame: frame) else { return }
+        Log.info("duration editor dismissed by outside click at \(location), status frame \(String(describing: frame))")
         collapse()
     }
 
