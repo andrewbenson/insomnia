@@ -60,6 +60,7 @@ struct SettingsView: View {
                 Label(page.rawValue, systemImage: page.symbol).tag(page)
             }
             .listStyle(.sidebar)
+            .scrollContentBackground(.hidden)
             .navigationSplitViewColumnWidth(150)
         } detail: {
             VStack(alignment: .leading, spacing: 0) {
@@ -82,7 +83,6 @@ struct SettingsView: View {
             }
         }
         .navigationSplitViewStyle(.balanced)
-        .background(.ultraThinMaterial)
         .frame(width: 680, height: 480)
         .onAppear {
             loadPassword()

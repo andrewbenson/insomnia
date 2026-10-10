@@ -61,8 +61,7 @@ struct SettingsDisclosure<Content: View>: View {
     }
 }
 
-/// Native Liquid Glass; the system handles tint, contrast and reduced
-/// transparency instead of reproducing the material with custom blur.
+/// Content groups sit on the window's single native glass surface.
 struct SettingsCard<Content: View>: View {
     private let title: String?
     private let footer: String?
@@ -80,7 +79,11 @@ struct SettingsCard<Content: View>: View {
             VStack(alignment: .leading, spacing: 14) { content }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(16)
-                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
+                .background(Color.primary.opacity(0.025), in: RoundedRectangle(cornerRadius: 16))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16)
+                        .strokeBorder(Color.primary.opacity(0.06), lineWidth: 0.5)
+                }
                 .foregroundStyle(.primary)
             if let footer {
                 Text(footer).font(.caption).foregroundStyle(.secondary)

@@ -26,16 +26,15 @@ final class SettingsLayoutTests: XCTestCase {
         if let previews { try FileManager.default.createDirectory(at: previews, withIntermediateDirectories: true) }
         for page in SettingsView.Page.allCases {
             let root = SettingsView(manager: manager, secrets: InMemoryHotspotSecretStore(), locationPermission: LocationPermission(authorizationStatus: .notDetermined, request: {}), loginItem: LoginItem(service: LoginService(), install: "test", activity: NotificationCenter()), initialPage: page)
-            let host = NSHostingView(rootView: root.environment(\.colorScheme, .dark))
-            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 480), styleMask: [.titled], backing: .buffered, defer: false)
-            window.isReleasedWhenClosed = false
-            window.contentView = host
+            let owner = SettingsWindow { AnyView(root.environment(\.colorScheme, .dark)) }
+            let window = owner.make()
+            let glass = try XCTUnwrap(window.contentView as? NSGlassEffectView)
+            let host = try XCTUnwrap(glass.contentView)
             window.appearance = NSAppearance(named: .darkAqua)
-            host.frame = NSRect(x: 0, y: 0, width: 680, height: 480)
             host.layoutSubtreeIfNeeded()
             await Task.yield()
-            XCTAssertEqual(host.fittingSize.width, 680, accuracy: 1, page.rawValue)
-            XCTAssertEqual(host.fittingSize.height, 480, accuracy: 1, page.rawValue)
+            XCTAssertEqual(window.contentLayoutRect.width, 680, accuracy: 1, page.rawValue)
+            XCTAssertEqual(window.contentLayoutRect.height, 480, accuracy: 1, page.rawValue)
             XCTAssertFalse(window.isVisible, "The preview must never appear on the user's desktop")
             if let previews, let bitmap = host.bitmapImageRepForCachingDisplay(in: host.bounds) {
                 host.cacheDisplay(in: host.bounds, to: bitmap)
