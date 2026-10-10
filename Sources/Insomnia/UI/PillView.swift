@@ -33,7 +33,7 @@ struct PillView: View {
             // the pill's width and the menu bar never re-lays out on a key.
             Text(field.placeholder)
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
-                .padding(.horizontal, 10)
+                .padding(.horizontal, 5)
                 .hidden()
             Text(text ?? field.placeholder)
                 .font(.system(size: 12, weight: isPlaceholder ? .regular : .semibold, design: .rounded))

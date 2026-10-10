@@ -28,7 +28,7 @@ struct StatusRootView: View {
     /// inserting and removing the pill (which would move the layout).
     private static let hiddenPillScale: CGFloat = 0.55
     /// Gap between the mark and the slots, and between the slots.
-    private static let slotSpacing: CGFloat = 7
+    private static let slotSpacing: CGFloat = 4
     /// Each slot's laid-out width, for the distance a collapsing pill
     /// travels; a fixed slot's width never changes once measured.
     @State private var pillWidths: [DurationInput.Field: CGFloat] = [:]
@@ -64,7 +64,7 @@ struct StatusRootView: View {
     }
 
     var body: some View {
-        HStack(spacing: showsCountdown && !model.slotsPresent ? 4 : Self.slotSpacing) {
+        HStack(spacing: Self.slotSpacing) {
             icon
             // What comes and goes with the layout carries its own animation
             // on its transition (`Motion.countdownTransition` and friends):
@@ -85,11 +85,11 @@ struct StatusRootView: View {
                 }
             }
         }
-        .padding(.leading, showsCountdown && !model.slotsPresent ? 2 : 6)
+        .padding(.leading, showsCountdown || model.slotsPresent ? 2 : 6)
         // Never animated: `slotsPresent` can land in the same transaction as
         // a `withAnimation` (a refused start reopens the pills in one turn),
         // and an interpolated inset would report a width per frame.
-        .animation(nil) { $0.padding(.trailing, model.slotsPresent ? 8 : (showsCountdown ? 2 : 6)) }
+        .animation(nil) { $0.padding(.trailing, model.slotsPresent ? 4 : (showsCountdown ? 2 : 6)) }
         .frame(height: NSStatusBar.system.thickness)
         .fixedSize()
         .contentShape(Rectangle())
