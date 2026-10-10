@@ -31,6 +31,13 @@ struct SettingsView: View {
     @State private var presetError: String?
     @State private var selectedPage: Page? = .lidPower
     @State private var showProtectedApps = true
+    @State private var showLidHelp = false
+    @State private var showDimmingDetails = false
+    @State private var showAutomaticPausing = false
+    @State private var showAppNap = false
+    @State private var showTmux = false
+    @State private var showPrivacy = false
+    @State private var showConfigFile = false
     @State private var newTmuxTarget = ""
     /// The password field, saving, what was saved, and the notice under
     /// the field.
@@ -60,30 +67,22 @@ struct SettingsView: View {
                     .font(.title2.weight(.semibold))
                     .padding(.horizontal, 20)
                     .padding(.top, 18)
-                Form {
-                    switch selectedPage ?? .lidPower {
-                    case .general:
-                        appSection
-                        sessionSection
-                    case .lidPower:
-                        lidSection
-                        powerSection
-                    case .apps:
-                        Picker("Application list", selection: $showProtectedApps) {
-                            Text("Paused").tag(false)
-                            Text("Protected").tag(true)
+                ScrollView {
+                    GlassEffectContainer(spacing: 20) {
+                        VStack(alignment: .leading, spacing: 20) {
+                            pageContent
                         }
-                        .pickerStyle(.segmented)
-                        if showProtectedApps { agentSection } else { pauseSection }
-                    case .network:
-                        networkSection
+                        .padding(20)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-                .formStyle(.grouped)
+                .toggleStyle(.switch)
+                .textFieldStyle(.roundedBorder)
+                .buttonStyle(.glass)
             }
         }
         .navigationSplitViewStyle(.balanced)
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(.ultraThinMaterial)
         .frame(width: 680, height: 480)
         .onAppear {
             loadPassword()
@@ -103,6 +102,27 @@ struct SettingsView: View {
         .onChange(of: manager.config) { refreshWouldFreeze() }
         .onReceive(NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didLaunchApplicationNotification)) { _ in refreshWouldFreeze() }
         .onReceive(NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didTerminateApplicationNotification)) { _ in refreshWouldFreeze() }
+    }
+
+    @ViewBuilder
+    private var pageContent: some View {
+        switch selectedPage ?? .lidPower {
+        case .general:
+            appSection
+            sessionSection
+        case .lidPower:
+            lidSection
+            powerSection
+        case .apps:
+            Picker("Application list", selection: $showProtectedApps) {
+                Text("Paused").tag(false)
+                Text("Protected").tag(true)
+            }
+            .pickerStyle(.segmented)
+            if showProtectedApps { agentSection } else { pauseSection }
+        case .network:
+            networkSection
+        }
     }
 
     // MARK: Bindings
@@ -147,7 +167,7 @@ struct SettingsView: View {
     // MARK: Sections
 
     private var sessionSection: some View {
-        Section("Session") {
+        SettingsCard("Session") {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 82))], spacing: 8) {
                 ForEach(manager.config.presets, id: \.self) { p in
                     HStack(spacing: 6) {
@@ -209,7 +229,7 @@ struct SettingsView: View {
     static let microphoneNote = "On Mac laptops with Apple silicon or a T2 chip, closing the lid disconnects the built-in microphone in hardware. Recording a meeting with the lid closed needs AirPods or an external mic."
 
     private var lidSection: some View {
-        Section {
+        SettingsCard("Lid-close actions") {
             // The one-time lid-close update, for a user who has
             // notifications turned off. Stays until dismissed.
             if let notice = manager.config.lidCloseDefaultsNotice {
@@ -220,64 +240,61 @@ struct SettingsView: View {
                     Button("Dismiss") { manager.dismissLidCloseNotice() }
                 }
             }
-            Toggle("Darken display and keyboard", isOn: bind(\.darkenDisplayOnLidClose))
-            ForEach(manager.darkenRefusals, id: \.self) { reason in
-                Text(reason)
-                    .font(.caption)
-                    .foregroundStyle(.orange)
+            SettingsToggle("Darken display and keyboard", isOn: bind(\.darkenDisplayOnLidClose))
+            if !manager.darkenRefusals.isEmpty {
+                SettingsDisclosure("Dimming has limited support on this Mac", isExpanded: $showDimmingDetails) {
+                    ForEach(manager.darkenRefusals, id: \.self) { reason in
+                        Text(reason).font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                .foregroundStyle(.orange)
             }
-            Toggle("Mute audio on lid close", isOn: bind(\.muteOnLidClose))
-            Toggle("Low Power Mode while the lid is closed", isOn: bind(\.lowPowerOnLidClose))
+            SettingsToggle("Mute audio on lid close", isOn: bind(\.muteOnLidClose))
+            SettingsToggle("Low Power Mode while the lid is closed", isOn: bind(\.lowPowerOnLidClose))
                 // A floor input: apply it now if the lid is already closed.
                 .onChange(of: manager.config.lowPowerOnLidClose) { manager.services?.reevaluateFloors() }
-            DisclosureGroup("About lid-close actions") {
+            SettingsDisclosure("About lid-close actions", isExpanded: $showLidHelp) {
                 Text(Self.microphoneNote)
                 Text("The display brightness and keyboard backlight are saved, set to zero and restored when the lid opens. If Insomnia is not running when you open the lid, press the brightness-up key.")
             }
             .font(.caption)
             .foregroundStyle(.secondary)
-        } header: {
-            Text("Lid-close actions")
         }
     }
 
     private var pauseSection: some View {
-        Section {
+        SettingsCard(footer: "Listed apps pause when the lid closes and resume when it opens. Protected apps are never paused.") {
             ApplicationList(
                 title: "Pause with lid closed",
                 items: manager.config.freezeList,
                 add: { id in update { if !$0.freezeList.contains(id) { $0.freezeList.append(id) } } },
                 remove: { id in update { $0.freezeList.removeAll { $0 == id } } }
             )
-            DisclosureGroup("Automatic pausing") {
-                Toggle("Pause other apps too", isOn: bind(\.freezeAllApps))
+            SettingsDisclosure("Automatic pausing", isExpanded: $showAutomaticPausing) {
+                SettingsToggle("Pause other apps too", isOn: bind(\.freezeAllApps))
                 if manager.config.freezeAllApps {
                     Text(wouldFreezeText).font(.caption).foregroundStyle(.secondary)
                 }
-                Toggle("Pause Docker when no containers are running", isOn: bind(\.dockerRule))
+                SettingsToggle("Pause Docker when no containers are running", isOn: bind(\.dockerRule))
                 Text("Protected apps, Apple apps, editors, terminals, browsers, meeting apps and background services are excluded from automatic pausing. An explicit entry above overrides built-in protection. A container that starts just before Docker is paused may also be paused.")
                     .font(.caption).foregroundStyle(.secondary)
             }
-        } footer: {
-            Text("Listed apps pause when the lid closes and resume when it opens. Protected apps are never paused.")
         }
     }
 
     private var agentSection: some View {
-        Section {
+        SettingsCard(footer: "These apps are excluded from pausing, including when they also appear in the pause list.") {
             ApplicationList(
                 title: "Protected apps",
                 items: manager.config.agentList,
                 add: { id in update { if !$0.agentList.contains(id) { $0.agentList.append(id) } } },
                 remove: { id in update { $0.agentList.removeAll { $0 == id } } }
             )
-            DisclosureGroup("App Nap") {
-                Toggle("Disable App Nap during sessions", isOn: bind(\.disableAppNapForAgents))
+            SettingsDisclosure("App Nap", isExpanded: $showAppNap) {
+                SettingsToggle("Disable App Nap during sessions", isOn: bind(\.disableAppNapForAgents))
                 Text("Prevents these apps from being throttled. Their previous preferences are restored when the session ends.")
                     .font(.caption).foregroundStyle(.secondary)
             }
-        } footer: {
-            Text("These apps are excluded from pausing, including when they also appear in the pause list.")
         }
     }
 
@@ -293,7 +310,7 @@ struct SettingsView: View {
     }
 
     private var powerSection: some View {
-        Section("Battery and thermal") {
+        SettingsCard("Battery and thermal") {
             Stepper(value: lowPowerFloor, in: 0...100, step: Config.floorStep) {
                 LabeledContent("Low Power Mode below", value: "\(manager.config.lowPowerFloor)%")
             }
@@ -303,13 +320,13 @@ struct SettingsView: View {
             Text("0 turns the battery end off. The end floor stays below the Low Power Mode floor. Moving one onto the other moves it along.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Toggle("Apply thermal limits", isOn: bind(\.thermalRules))
+            SettingsToggle("Apply thermal limits", isOn: bind(\.thermalRules))
                 .help("Low Power Mode when hot; end the session at critical temperature")
         }
     }
 
     private var networkSection: some View {
-        Section {
+        SettingsCard("Network failover") {
             TextField("Hotspot SSID", text: bind(\.hotspotSSID))
             HStack {
                 SecureField("Hotspot password", text: Binding(get: { hotspot.password }, set: { hotspot.edit($0) }))
@@ -337,7 +354,7 @@ struct SettingsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            DisclosureGroup("tmux automation") {
+            SettingsDisclosure("tmux automation", isExpanded: $showTmux) {
             Stepper(value: nudgeSeconds, in: 10...900, step: 10) {
                 LabeledContent("Nudge tmux after", value: "\(Int(manager.config.nudgeThreshold)) s offline")
             }
@@ -347,7 +364,7 @@ struct SettingsView: View {
             Text(TmuxNudge.markCommand())
                 .font(.system(.caption, design: .monospaced))
                 .textSelection(.enabled)
-            Toggle("Press Enter after continue", isOn: bind(\.tmuxNudgePressesEnter))
+            SettingsToggle("Press Enter after continue", isOn: bind(\.tmuxNudgePressesEnter))
             Text("Enter submits whatever is already typed in that pane, including a line that was never finished. When off, \"continue\" is typed and nothing submits it.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -368,12 +385,10 @@ struct SettingsView: View {
                     .disabled(newTmuxTarget.trimmingCharacters(in: .whitespaces).isEmpty)
             }
             }
-            DisclosureGroup("Password and privacy") {
+            SettingsDisclosure("Password and privacy", isExpanded: $showPrivacy) {
                 Text("The password stays in your login Keychain. After reinstalling an ad-hoc signed build, enter it again. Location permission is used only to read Wi-Fi network names; Insomnia never requests location updates.")
                     .font(.caption).foregroundStyle(.secondary)
             }
-        } header: {
-            Text("Network failover")
         }
     }
 
@@ -541,10 +556,10 @@ struct SettingsView: View {
     }
 
     private var appSection: some View {
-        Section("App") {
-            Toggle("Launch at login", isOn: launchAtLogin)
+        SettingsCard("App") {
+            SettingsToggle("Launch at login", isOn: launchAtLogin)
             loginItemNote
-            DisclosureGroup("Configuration file") {
+            SettingsDisclosure("Configuration file", isExpanded: $showConfigFile) {
                 Text(manager.paths.configFile.path)
                     .font(.caption)
                     .foregroundStyle(.secondary)

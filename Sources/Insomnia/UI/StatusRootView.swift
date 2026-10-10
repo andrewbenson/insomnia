@@ -28,7 +28,7 @@ struct StatusRootView: View {
     /// inserting and removing the pill (which would move the layout).
     private static let hiddenPillScale: CGFloat = 0.55
     /// Gap between the mark and the slots, and between the slots.
-    private static let slotSpacing: CGFloat = 4
+    private static let slotSpacing: CGFloat = 2
     /// Each slot's laid-out width, for the distance a collapsing pill
     /// travels; a fixed slot's width never changes once measured.
     @State private var pillWidths: [DurationInput.Field: CGFloat] = [:]
@@ -85,11 +85,8 @@ struct StatusRootView: View {
                 }
             }
         }
-        .padding(.leading, showsCountdown || model.slotsPresent ? 2 : 6)
-        // Never animated: `slotsPresent` can land in the same transaction as
-        // a `withAnimation` (a refused start reopens the pills in one turn),
-        // and an interpolated inset would report a width per frame.
-        .animation(nil) { $0.padding(.trailing, model.slotsPresent ? 4 : (showsCountdown ? 2 : 6)) }
+        // AppKit already provides space between status items. Reserve only
+        // the controls themselves here, with no additional outer insets.
         .frame(height: NSStatusBar.system.thickness)
         .fixedSize()
         .contentShape(Rectangle())
@@ -189,7 +186,6 @@ struct StatusRootView: View {
             .monospacedDigit()
             .contentTransition(.numericText(countsDown: true))
             .animation(Motion.tick(reduceMotion: reduceMotion), value: countdownText)
-            .padding(.trailing, 1)
             .transition(Motion.countdownTransition(reduceMotion: reduceMotion))
             .contentShape(Rectangle())
             .onTapGesture(perform: onTapCountdown)

@@ -522,7 +522,7 @@ final class UIStatusTests: XCTestCase {
             m.pendingCountdown = model.pendingCountdown
             m.pendingProjection = model.pendingProjection
             let root = StatusRootView(model: m, manager: manager, onTapIcon: {}, onTapPill: { _ in }, onTapCountdown: {}, onHoldEnd: {}, onWidthChange: { _ in })
-            return max(StatusItemController.makeHostingView(root).fittingSize.width.rounded(.up), 24)
+            return max(StatusItemController.makeHostingView(root).fittingSize.width.rounded(.up), 20)
         }
 
         /// Let the layout report and the pills stagger in.
@@ -635,7 +635,7 @@ final class UIStatusTests: XCTestCase {
         let controller = lab.controller
         let manager = lab.manager
         XCTAssertEqual(controller.widthTargetChangeCount, 1, "installing the host sets the idle width")
-        XCTAssertGreaterThanOrEqual(controller.hostWidth, 24, "the host is laid out at the idle width, not left at zero")
+        XCTAssertGreaterThanOrEqual(controller.hostWidth, 20, "the host is laid out at the idle width, not left at zero")
         XCTAssertEqual(controller.hostWidth, controller.widthTarget, "install: the host is as wide as the first target")
 
         controller.expand(mode: .start)

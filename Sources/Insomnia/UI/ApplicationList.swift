@@ -75,6 +75,7 @@ struct ApplicationList: View {
 
     @State private var isDropTarget = false
     @State private var newIdentifier = ""
+    @State private var showIdentifierEntry = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -119,7 +120,7 @@ struct ApplicationList: View {
                 .padding(.horizontal, 10)
                 .padding(.vertical, 7)
             }
-            .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
+            .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 8))
             .overlay {
                 RoundedRectangle(cornerRadius: 8)
                     .strokeBorder(isDropTarget ? Color.accentColor : Color.secondary.opacity(0.2), lineWidth: isDropTarget ? 2 : 1)
@@ -130,7 +131,7 @@ struct ApplicationList: View {
                 return !identifiers.isEmpty
             } isTargeted: { isDropTarget = $0 }
 
-            DisclosureGroup("Add by bundle identifier") {
+            SettingsDisclosure("Add by bundle identifier", isExpanded: $showIdentifierEntry) {
                 HStack {
                     TextField("com.example.application", text: $newIdentifier)
                         .textFieldStyle(.roundedBorder)

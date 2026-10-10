@@ -34,6 +34,9 @@ final class SettingsWindow {
         let host = NSHostingController(rootView: content())
         let window = NSWindow(contentViewController: host)
         window.title = "Insomnia Settings"
+        window.titlebarAppearsTransparent = true
+        window.isOpaque = false
+        window.backgroundColor = .clear
         window.styleMask = [.titled, .closable, .miniaturizable]
         // Closing settings must not deallocate the window: the status item
         // keeps a reference and reopens the same one.
