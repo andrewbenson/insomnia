@@ -18,7 +18,7 @@ struct StatusRootView: View {
     let onTapIcon: () -> Void
     let onTapPill: (DurationInput.Field) -> Void
     let onTapCountdown: () -> Void
-    let onHoldEnd: () -> Void
+    let onEndSession: () -> Void
     let onWidthChange: (CGFloat) -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotionEnv
@@ -80,7 +80,7 @@ struct StatusRootView: View {
             } else if showsCountdown {
                 countdown
                 if showsRunningControls {
-                    HoldToEndButton(reduceMotion: reduceMotion, action: onHoldEnd)
+                    EndSessionButton(action: onEndSession)
                         .transition(Motion.ringTransition(reduceMotion: reduceMotion))
                 }
             }
@@ -95,8 +95,7 @@ struct StatusRootView: View {
         } action: { width in
             onWidthChange(width)
         }
-        // The host is kept as wide as the widest content it has held, so the
-        // content must sit at its leading edge rather than centred in it.
+        // Keep content leading-aligned when the status item changes layout.
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
@@ -179,7 +178,7 @@ struct StatusRootView: View {
     /// is pending: the manager has to arm the recovery agent and disable
     /// sleep first, and either can take seconds. The projection is what the
     /// session will read once confirmed, so the live text replaces it
-    /// without a jump; the hold-to-end ring waits for the confirmation.
+    /// without a jump; the end button waits for the confirmation.
     private var countdown: some View {
         Text(countdownText)
             .font(.system(size: 13, weight: .medium, design: .rounded))

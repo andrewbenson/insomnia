@@ -33,7 +33,7 @@
 > [Validation status](docs/release-validation.md) · [Apple's ventilation guidance](https://support.apple.com/en-us/102336)
 
 <p align="center">
-  <img src="docs/assets/session-flow.svg" alt="Illustrated menu-bar controls: enter Days, Hours, and Minutes, watch the countdown, and hold the end control to finish early. Click the eye or countdown to add time. Closing the lid is optional, and incomplete recovery needs attention." width="880">
+  <img src="docs/assets/session-flow.svg" alt="Illustrated menu-bar controls: enter Days, Hours, and Minutes, watch the countdown, and click the end control to finish early. Click the eye or countdown to add time. Closing the lid is optional, and incomplete recovery needs attention." width="880">
 </p>
 
 ## Install
@@ -199,7 +199,7 @@ installer prints its pid.
 1. **Start:** click the eye in the menu bar, enter Days / Hours / Minutes, and
    press Enter.
 2. **Extend:** click the eye or countdown during a session and enter more time.
-3. **End early:** press and hold the end control beside the countdown.
+3. **End early:** click the × button beside the countdown.
 4. **Inspect or configure:** right-click for status, recovery warnings,
    **Settings**, and **Quit Insomnia**. Quitting requests session cleanup and
    can be refused while required recovery remains.

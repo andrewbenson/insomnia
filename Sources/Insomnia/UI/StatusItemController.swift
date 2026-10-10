@@ -58,7 +58,7 @@ final class StatusItemController: NSObject {
     /// How many times the width target has changed. The layout is meant to
     /// change once per open and once per close; tests pin that.
     private(set) var widthTargetChangeCount = 0
-    /// The width the hosting view is laid out at (the widest content it has held).
+    /// The hosting view's width, matching the visible status item.
     var hostWidth: CGFloat { hostingView?.frame.width ?? 0 }
 
     /// Autosave name so macOS remembers where the user drags the item.
@@ -109,7 +109,7 @@ final class StatusItemController: NSObject {
             onTapIcon: { [weak self] in self?.iconTapped() },
             onTapPill: { [weak self] field in self?.focus(field) },
             onTapCountdown: { [weak self] in self?.customExtend() },
-            onHoldEnd: { [weak self] in self?.holdToEnd() },
+            onEndSession: { [weak self] in self?.endSession() },
             onWidthChange: { [weak self] w in self?.widthChanged(w) }
         )
         let host = Self.makeHostingView(root)
@@ -163,17 +163,14 @@ final class StatusItemController: NSObject {
     }
 
     /// Set the item's length to `width`, once; a repeat of the current
-    /// target is ignored. The host only ever grows: it is laid out at the
-    /// widest content it has held, so content on its way out always has
-    /// room to finish its transition when the length narrows over it.
+    /// target is ignored. The host must shrink as well as grow so SwiftUI's
+    /// hit-testing viewport matches the visible status item.
     private func retargetWidth(_ width: CGFloat) {
         let w = max(width.rounded(.up), 17)
         guard w != widthTarget else { return }
         widthTarget = w
         widthTargetChangeCount += 1
-        if let host = hostingView, host.frame.width < w {
-            host.frame.size.width = w
-        }
+        hostingView?.resizeForStatusItem(w)
         widthWriter?.write(w)
     }
 
@@ -617,9 +614,8 @@ final class StatusItemController: NSObject {
         }
     }
 
-    /// The status item's hold-to-end ring completed. Ignored while a start is
-    /// still in flight.
-    func holdToEnd() {
+    /// The native end button was clicked. Ignored while a start is in flight.
+    func endSession() {
         guard manager.isActive else { return }
         endNow()
     }
@@ -857,6 +853,10 @@ final class StatusItemController: NSObject {
 /// on a one-button mouse.
 final class StatusHostingView: NSHostingView<StatusRootView> {
     var onRightMouseDown: (() -> Void)?
+
+    func resizeForStatusItem(_ width: CGFloat) {
+        frame.size.width = width
+    }
 
     override func rightMouseDown(with event: NSEvent) {
         onRightMouseDown?()

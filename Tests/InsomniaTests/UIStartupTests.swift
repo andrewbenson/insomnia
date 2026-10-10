@@ -57,7 +57,7 @@ final class UIStartupTests: XCTestCase {
                 onTapIcon: {},
                 onTapPill: { _ in },
                 onTapCountdown: {},
-                onHoldEnd: {},
+                onEndSession: {},
                 onWidthChange: { _ in }
             )
             return StatusItemController.makeHostingView(root).fittingSize.width
@@ -86,7 +86,7 @@ final class UIStartupTests: XCTestCase {
         rig.openAndTypeOneDay()
         let idleWidth: CGFloat = {
             let m = MenuBarModel()
-            let root = StatusRootView(model: m, manager: rig.manager, onTapIcon: {}, onTapPill: { _ in }, onTapCountdown: {}, onHoldEnd: {}, onWidthChange: { _ in })
+            let root = StatusRootView(model: m, manager: rig.manager, onTapIcon: {}, onTapPill: { _ in }, onTapCountdown: {}, onEndSession: {}, onWidthChange: { _ in })
             return StatusItemController.makeHostingView(root).fittingSize.width
         }()
 
@@ -259,7 +259,7 @@ final class UIStartupTests: XCTestCase {
         rig.controller.commit()
         rig.controller.iconTapped()
         rig.controller.customExtend()
-        rig.controller.holdToEnd()
+        rig.controller.endSession()
         await settleQueuedRequests()
         XCTAssertEqual(rig.model.phase, .starting)
         XCTAssertEqual(rig.model.rejectBounce, bounces)
@@ -410,7 +410,7 @@ final class UIStartupTests: XCTestCase {
 
         // Hold-to-end while the extend waits: the end queues behind it and
         // invalidates it.
-        rig.controller.holdToEnd()
+        rig.controller.endSession()
         await settleQueuedRequests()
         await gate.open()
         ok = await waitUntil { !rig.manager.isActive && rig.model.phase == .idle }

@@ -7,7 +7,7 @@ import XCTest
 final class CompactStatusLayoutTests: XCTestCase {
     @MainActor
     private func width(model: MenuBarModel, manager: SessionManager) -> CGFloat {
-        let root = StatusRootView(model: model, manager: manager, onTapIcon: {}, onTapPill: { _ in }, onTapCountdown: {}, onHoldEnd: {}, onWidthChange: { _ in })
+        let root = StatusRootView(model: model, manager: manager, onTapIcon: {}, onTapPill: { _ in }, onTapCountdown: {}, onEndSession: {}, onWidthChange: { _ in })
         return NSHostingView(rootView: root).fittingSize.width
     }
 

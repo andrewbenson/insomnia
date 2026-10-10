@@ -13,7 +13,7 @@ final class UIStatusTests: XCTestCase {
             onTapIcon: {},
             onTapPill: { _ in },
             onTapCountdown: {},
-            onHoldEnd: {},
+            onEndSession: {},
             onWidthChange: { _ in }
         )
 
@@ -43,14 +43,14 @@ final class UIStatusTests: XCTestCase {
                 onTapIcon: {},
                 onTapPill: { _ in },
                 onTapCountdown: {},
-                onHoldEnd: {},
+                onEndSession: {},
                 onWidthChange: { _ in }
             )
             return StatusItemController.makeHostingView(root).fittingSize.width
         }
         let idle = MenuBarModel()
         let idleWidth = StatusItemController.makeHostingView(StatusRootView(
-            model: idle, manager: manager, onTapIcon: {}, onTapPill: { _ in }, onTapCountdown: {}, onHoldEnd: {}, onWidthChange: { _ in }
+            model: idle, manager: manager, onTapIcon: {}, onTapPill: { _ in }, onTapCountdown: {}, onEndSession: {}, onWidthChange: { _ in }
         )).fittingSize.width
 
         model.visiblePills = 0
@@ -94,9 +94,7 @@ final class UIStatusTests: XCTestCase {
     }
 
     @MainActor
-    func testTickAnimationIsShorterThanBaseAndHoldIsSubSecond() {
-        XCTAssertEqual(Motion.holdDuration, 0.6, accuracy: 0.0001)
-        XCTAssertLessThan(Motion.holdDuration, 1)
+    func testTickAnimationIsShorterThanBase() {
         XCTAssertEqual(Motion.tick(reduceMotion: true), Motion.reduced)
         XCTAssertNotEqual(Motion.tick(reduceMotion: false), Motion.base)
     }
@@ -521,7 +519,7 @@ final class UIStatusTests: XCTestCase {
             m.phase = phase
             m.pendingCountdown = model.pendingCountdown
             m.pendingProjection = model.pendingProjection
-            let root = StatusRootView(model: m, manager: manager, onTapIcon: {}, onTapPill: { _ in }, onTapCountdown: {}, onHoldEnd: {}, onWidthChange: { _ in })
+            let root = StatusRootView(model: m, manager: manager, onTapIcon: {}, onTapPill: { _ in }, onTapCountdown: {}, onEndSession: {}, onWidthChange: { _ in })
             return max(StatusItemController.makeHostingView(root).fittingSize.width.rounded(.up), 17)
         }
 
