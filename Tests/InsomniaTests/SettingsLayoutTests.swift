@@ -28,8 +28,7 @@ final class SettingsLayoutTests: XCTestCase {
             let root = SettingsView(manager: manager, secrets: InMemoryHotspotSecretStore(), locationPermission: LocationPermission(authorizationStatus: .notDetermined, request: {}), loginItem: LoginItem(service: LoginService(), install: "test", activity: NotificationCenter()), initialPage: page)
             let owner = SettingsWindow { AnyView(root.environment(\.colorScheme, .dark)) }
             let window = owner.make()
-            let glass = try XCTUnwrap(window.contentView as? NSGlassEffectView)
-            let host = try XCTUnwrap(glass.contentView)
+            let host = try XCTUnwrap(window.contentView)
             window.appearance = NSAppearance(named: .darkAqua)
             host.layoutSubtreeIfNeeded()
             await Task.yield()

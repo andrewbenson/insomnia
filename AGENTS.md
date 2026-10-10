@@ -11,6 +11,13 @@ typing and animations from introducing unnecessary width changes. Preserve
 readable values, accessible labels, and usable click targets while tightening
 the layout.
 
+## Settings UI
+
+Use native SwiftUI components and their system styling for settings: navigation,
+forms, sections, lists, toggles, disclosure groups, buttons, and file importers.
+Let macOS own the window chrome and materials. Do not add custom glass backdrops,
+card styling, or replacements for standard controls.
+
 ## GUI tests
 
 UIStatusTests and UIStartupTests create real menu bar items and keyboard-focus

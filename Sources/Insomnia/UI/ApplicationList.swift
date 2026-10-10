@@ -76,6 +76,8 @@ struct ApplicationList: View {
     @State private var isDropTarget = false
     @State private var newIdentifier = ""
     @State private var showIdentifierEntry = false
+    @State private var choosingApplications = false
+    @State private var importError: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -87,19 +89,16 @@ struct ApplicationList: View {
                         .font(.callout)
                         .frame(maxWidth: .infinity, minHeight: 60)
                 } else {
-                    ScrollView {
-                        LazyVStack(spacing: 0) {
-                            ForEach(items, id: \.self) { identifier in
-                                applicationRow(identifier)
-                                if identifier != items.last { Divider().padding(.leading, 46) }
-                            }
+                    List {
+                        ForEach(items, id: \.self) { identifier in
+                            applicationRow(identifier)
                         }
                     }
                     .frame(height: min(CGFloat(items.count) * 46, 184))
                 }
                 Divider()
                 HStack(spacing: 12) {
-                    Button(action: chooseApplications) { Image(systemName: "plus") }
+                    Button { choosingApplications = true } label: { Image(systemName: "plus") }
                         .help("Add applications")
                         .accessibilityLabel("Add applications to \(title)")
                     Menu {
@@ -120,18 +119,14 @@ struct ApplicationList: View {
                 .padding(.horizontal, 10)
                 .padding(.vertical, 7)
             }
-            .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 8))
-            .overlay {
-                RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(isDropTarget ? Color.accentColor : Color.secondary.opacity(0.2), lineWidth: isDropTarget ? 2 : 1)
-            }
             .dropDestination(for: URL.self) { urls, _ in
                 let identifiers = ApplicationBundles.identifiers(in: urls)
                 identifiers.filter { !items.contains($0) }.forEach(add)
                 return !identifiers.isEmpty
             } isTargeted: { isDropTarget = $0 }
 
-            SettingsDisclosure("Add by bundle identifier", isExpanded: $showIdentifierEntry) {
+            if let importError { Text(importError).font(.caption).foregroundStyle(.red) }
+            DisclosureGroup("Add by bundle identifier", isExpanded: $showIdentifierEntry) {
                 HStack {
                     TextField("com.example.application", text: $newIdentifier)
                         .textFieldStyle(.roundedBorder)
@@ -143,6 +138,16 @@ struct ApplicationList: View {
             }
             .font(.caption)
         }
+        .fileImporter(isPresented: $choosingApplications, allowedContentTypes: [.applicationBundle], allowsMultipleSelection: true) { result in
+            switch result {
+            case let .success(urls):
+                ApplicationBundles.identifiers(in: urls).filter { !items.contains($0) }.forEach(add)
+                importError = nil
+            case let .failure(error):
+                importError = error.localizedDescription
+            }
+        }
+
     }
 
     private func applicationRow(_ identifier: String) -> some View {
@@ -173,18 +178,6 @@ struct ApplicationList: View {
         }
         .padding(.horizontal, 10)
         .frame(height: 46)
-    }
-
-    private func chooseApplications() {
-        let panel = NSOpenPanel()
-        panel.title = "Add applications"
-        panel.prompt = "Add"
-        panel.allowedContentTypes = [.applicationBundle]
-        panel.allowsMultipleSelection = true
-        panel.canChooseDirectories = false
-        panel.directoryURL = URL(fileURLWithPath: "/Applications", isDirectory: true)
-        guard panel.runModal() == .OK else { return }
-        ApplicationBundles.identifiers(in: panel.urls).filter { !items.contains($0) }.forEach(add)
     }
 
     private func addIdentifier() {

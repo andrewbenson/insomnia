@@ -7,10 +7,10 @@ final class SettingsDisclosureTests: XCTestCase {
     @MainActor
     func testExpandedSectionsActuallyRevealTheirContent() {
         _ = NSApplication.shared
-        let collapsed = SettingsDisclosure("Details", isExpanded: .constant(false)) {
+        let collapsed = DisclosureGroup("Details", isExpanded: .constant(false)) {
             Text("Useful settings").frame(height: 80)
         }
-        let expanded = SettingsDisclosure("Details", isExpanded: .constant(true)) {
+        let expanded = DisclosureGroup("Details", isExpanded: .constant(true)) {
             Text("Useful settings").frame(height: 80)
         }
         let closedHeight = NSHostingView(rootView: collapsed.frame(width: 300)).fittingSize.height

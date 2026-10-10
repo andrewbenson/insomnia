@@ -33,27 +33,10 @@ final class SettingsWindow {
     /// Internal so tests can verify the window without displaying it.
     func make() -> NSWindow {
         let host = NSHostingController(rootView: content())
-        let size = host.view.fittingSize
-        let glass = NSGlassEffectView(frame: NSRect(origin: .zero, size: size))
-        glass.style = .clear
-        glass.cornerRadius = 20
-        glass.contentView = host.view
-        let controller = NSViewController()
-        controller.view = glass
-        controller.addChild(host)
-        let window = NSWindow(contentViewController: controller)
+        let window = NSWindow(contentViewController: host)
         window.title = "Insomnia Settings"
         window.styleMask = [.titled, .closable, .miniaturizable]
-        // Establish the usable content size before extending the backdrop
-        // beneath the title bar. The SwiftUI host respects that safe area.
-        window.setContentSize(size)
-        let frame = window.frame
-        window.styleMask.insert(.fullSizeContentView)
-        window.setFrame(frame, display: false)
-        window.titleVisibility = .hidden
-        window.titlebarAppearsTransparent = true
-        window.isOpaque = false
-        window.backgroundColor = .clear
+        window.setContentSize(host.view.fittingSize)
         // Closing settings must not deallocate the window: the status item
         // keeps a reference and reopens the same one.
         window.isReleasedWhenClosed = false
