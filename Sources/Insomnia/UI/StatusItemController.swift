@@ -658,34 +658,7 @@ final class StatusItemController: NSObject {
     /// The menu's lines from what the session and the status source report
     /// now. Static, so a test can check them without a status item.
     static func menuItems(manager: SessionManager, status: any StatusSource) -> [StatusMenu.Item] {
-        StatusMenu.items(
-            sessionActive: manager.isActive,
-            sleepHeld: manager.state.sleepDisabledByUs,
-            machine: StatusLines.power(
-                lidClosed: status.lidClosed,
-                watts: status.instantWatts(),
-                batteryPercent: status.batteryPercent,
-                isCharging: status.isCharging
-            ),
-            network: WiFiStatusName.compact(
-                ssid: status.wifiSSID,
-                locationAuthorized: (status as? LiveStatusSource)?.locationPermission.isAuthorized ?? true
-            ),
-            actions: StatusLines.actions(
-                frozenCount: status.frozenCount,
-                dockerPaused: status.dockerPaused,
-                lastGap: status.lastGap
-            ),
-            throttledBrowsers: status.throttledBrowsers,
-            relaunchProblems: status.relaunchProblems,
-            // A report about an SSID edited away since is not shown.
-            hotspotWarning: status.hotspotPasswordReport?.problem(for: manager.config.hotspotSSID)?.menuLine,
-            error: manager.lastError,
-            commandRunning: manager.commandWarning,
-            foreignSleep: manager.foreignSleepWarning,
-            outputsWaiting: manager.outputsWaitingForRestore,
-            lidSimulationBuild: LidSimulationBuild.isCompiledIn
-        )
+        StatusMenu.liveItems(manager: manager, status: status)
     }
 
     @objc private func menuStopWaitingForOutput(_ sender: NSMenuItem) {

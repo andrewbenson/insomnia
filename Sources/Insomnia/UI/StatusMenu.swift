@@ -7,6 +7,39 @@ import AppKit
 /// tested without a menu bar; `menu(_:target:settings:quit:)` is the only
 /// part that touches AppKit.
 enum StatusMenu {
+    @MainActor
+    static func liveItems(manager: SessionManager, status: any StatusSource) -> [StatusMenu.Item] {
+        StatusMenu.items(
+            sessionActive: manager.isActive,
+            sleepHeld: manager.state.sleepDisabledByUs,
+            machine: StatusLines.power(
+                lidClosed: status.lidClosed,
+                watts: status.instantWatts(),
+                batteryPercent: status.batteryPercent,
+                isCharging: status.isCharging
+            ),
+            network: WiFiStatusName.compact(
+                ssid: status.wifiSSID,
+                locationAuthorized: (status as? LiveStatusSource)?.locationPermission.isAuthorized ?? true
+            ),
+            actions: StatusLines.actions(
+                frozenCount: status.frozenCount,
+                dockerPaused: status.dockerPaused,
+                lastGap: status.lastGap
+            ),
+            throttledBrowsers: status.throttledBrowsers,
+            relaunchProblems: status.relaunchProblems,
+            // A report about an SSID edited away since is not shown.
+            hotspotWarning: status.hotspotPasswordReport?.problem(for: manager.config.hotspotSSID)?.menuLine,
+            error: manager.lastError,
+            commandRunning: manager.commandWarning,
+            foreignSleep: manager.foreignSleepWarning,
+            outputsWaiting: manager.outputsWaitingForRestore,
+            lidSimulationBuild: LidSimulationBuild.isCompiledIn
+        )
+    }
+
+
     struct Item: Equatable {
         enum Kind: Equatable {
             case info

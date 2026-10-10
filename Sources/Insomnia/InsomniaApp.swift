@@ -1,17 +1,24 @@
 import AppKit
 import SwiftUI
 
-/// Menu bar app. The status item is an `NSStatusItem` hosting SwiftUI, and
-/// the settings window is an `NSWindow` this app opens itself (see
-/// `SettingsWindow`), so there is no SwiftUI scene with any content in it.
-/// `App` still requires one, hence the empty `Settings`. main.swift starts
-/// this app unless the command line asks for a one-shot mode first.
+/// System-owned menu bar popover; main.swift preserves the recovery CLI entry point.
 struct InsomniaApp: App {
     @NSApplicationDelegateAdaptor private var delegate: AppDelegate
 
     var body: some Scene {
+        MenuBarExtra {
+            SessionPopover(manager: delegate.manager, status: delegate.status)
+        } label: {
+            Image(systemName: "eye")
+            if delegate.manager.isActive {
+                Text(delegate.manager.countdownText).monospacedDigit()
+            }
+        }
+        .menuBarExtraStyle(.window)
         Settings {
-            EmptyView()
+            SettingsView(manager: delegate.manager, secrets: delegate.secrets,
+                         locationPermission: delegate.locationPermission,
+                         loginItem: delegate.loginItem)
         }
     }
 }
@@ -23,8 +30,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let secrets: any HotspotSecretStore
     let locationPermission: LocationPermission
     let loginItem = LoginItem()
-    private var statusItem: StatusItemController?
-    private var settingsWindow: SettingsWindow?
     private var terminating = false
 
     override init() {
@@ -69,20 +74,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             } catch {
                 Log.error("could not save config after the launch at login check: \(error.localizedDescription)")
             }
-        }
-        let settings = SettingsWindow { [manager, secrets, locationPermission, loginItem] in
-            AnyView(
-                SettingsView(
-                    manager: manager,
-                    secrets: secrets,
-                    locationPermission: locationPermission,
-                    loginItem: loginItem
-                )
-            )
-        }
-        settingsWindow = settings
-        statusItem = StatusItemController(manager: manager, status: status) { [weak settings] in
-            settings?.show()
         }
         Task { await manager.reconcile() }
     }
